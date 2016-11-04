@@ -23,6 +23,7 @@ import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.FSExceptionMessages;
 import org.apache.hadoop.fs.ParentNotDirectoryException;
 import org.apache.hadoop.fs.permission.AclEntryScope;
 import org.apache.hadoop.fs.permission.AclEntryType;
@@ -292,6 +293,28 @@ class FSPermissionChecker implements AccessControlEnforcer {
           throw new AccessControlException(
               toAccessControlString(inodeAttr, d.getFullPathName(), access));
         }
+        if (inodeAttr.getFsPermission().getStickyBit()) {
+          INodeAttributes[] childInodeAttrs = null;
+          byte[][] childComponents = null;
+          int childCompIdx = 0;
+          for(INode child : cList) {
+            if (childComponents == null) {
+              childComponents = child.getPathComponents();
+              childCompIdx = childComponents.length - 1;
+            } else {
+              childComponents[childCompIdx] = child.getLocalNameBytes();
+            }
+            if (childInodeAttrs == null) {
+              childInodeAttrs = new INodeAttributes[childComponents.length];
+            }
+            final int parentIdx = childComponents.length - 2;
+            // checkStickyBit only uses 2 entries in childInodeAttrs
+            childInodeAttrs[parentIdx] = inodeAttr;
+            childInodeAttrs[parentIdx + 1] =
+                getINodeAttrs(components, pathIdx, child, snapshotId);
+            checkStickyBit(childInodeAttrs, childComponents, parentIdx);
+          }
+        }
       }
 
       for(INode child : cList) {
@@ -437,7 +460,8 @@ class FSPermissionChecker implements AccessControlEnforcer {
     }
 
     throw new AccessControlException(String.format(
-        "Permission denied by sticky bit: user=%s, path=\"%s\":%s:%s:%s%s, " +
+        FSExceptionMessages.PERMISSION_DENIED_BY_STICKY_BIT +
+        ": user=%s, path=\"%s\":%s:%s:%s%s, " +
         "parent=\"%s\":%s:%s:%s%s", user,
         getPath(components, 0, index + 1),
         inode.getUserName(), inode.getGroupName(),
