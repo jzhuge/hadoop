@@ -180,14 +180,48 @@ commands demonstrate access to a storage account named `youraccount`.
 ## <a name="Testing_the_hadoop-azure_Module" />Testing the azure-datalake-store Module
 The hadoop-azure module includes a full suite of unit tests. Most of the tests will run without additional configuration by running mvn test. This includes tests against mocked storage, which is an in-memory emulation of Azure Data Lake Storage.
 
-A selection of tests can run against the Azure Data Lake Storage. To run tests against Adl storage. Please configure contract-test-options.xml with Adl account information mentioned in the above sections. Also turn on contract test execution flag to trigger tests against Azure Data Lake Storage.
+A selection of tests can be run against the Azure Data Lake Storage.
+To run these tests, please create `auth-keys.xml` with Adl account
+information mentioned in the above sections.
 
-        <property>
-            <name>dfs.adl.test.contract.enable</name>
-            <value>true</value>
-        </property>
+    <property>
+      <name>fs.contract.test.fs</name>
+      <value>org.apache.hadoop.fs.adl.AdlFileSystem</value>
+    </property>
 
-        <property>
-            <name>test.fs.adl.name</name>
-            <value>adl://yourcontainer.azuredatalakestore.net</value>
-        </property>
+    <property>
+      <name>fs.contract.test.fs.adl</name>
+      <value>adl://CONTAINER.azuredatalakestore.net</value>
+    </property>
+
+    <property>
+      <name>dfs.adls.oauth2.access.token.provider.type</name>
+      <value>ClientCredential</value>
+      <description>
+        Defines access token provider type.
+        Supported types are ClientCredential, RefreshToken, and Custom.
+      </description>
+    </property>
+
+    <property>
+      <name>dfs.adls.oauth2.access.token.provider</name>
+      <value>PROVIDER CLASS</value>
+      <description>
+        Defines a custom access token provider class.
+      </description>
+    </property>
+
+    <property>
+      <name>dfs.adls.oauth2.refresh.url</name>
+      <value>REFRESH URL</value>
+    </property>
+
+    <property>
+      <name>dfs.adls.oauth2.client.id</name>
+      <value>CLIENT ID</value>
+    </property>
+
+    <property>
+      <name>dfs.adls.oauth2.credential</name>
+      <value>CLIENT CREDENTIAL</value>
+    </property>

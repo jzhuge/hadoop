@@ -20,7 +20,10 @@
 package org.apache.hadoop.fs.adl.live;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.DelegateToFileSystem;
+import org.apache.hadoop.fs.FileContext;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.adl.AdlFileSystem;
 
 import java.io.IOException;
 import java.net.URI;
@@ -30,15 +33,10 @@ import java.net.URISyntaxException;
  * Configure Adl storage file system.
  */
 public final class AdlStorageConfiguration {
-  private static final String CONTRACT_ENABLE_KEY =
-      "dfs.adl.test.contract.enable";
 
-  private static final String TEST_CONFIGURATION_FILE_NAME =
-      "contract-test-options.xml";
-  private static final String TEST_SUPPORTED_TEST_CONFIGURATION_FILE_NAME =
-      "adls.xml";
   private static final String KEY_FILE_SYSTEM_IMPL = "fs.contract.test.fs";
-  private static final String KEY_FILE_SYSTEM = "test.fs.adl.name";
+  private static final String KEY_FILE_SYSTEM =
+      String.format("fs.contract.test.fs.%s", AdlFileSystem.SCHEME);
 
   private static boolean isContractTestEnabled = false;
   private static Configuration conf = null;
@@ -48,8 +46,7 @@ public final class AdlStorageConfiguration {
 
   public synchronized static Configuration getConfiguration() {
     Configuration newConf = new Configuration();
-    newConf.addResource(TEST_CONFIGURATION_FILE_NAME);
-    newConf.addResource(TEST_SUPPORTED_TEST_CONFIGURATION_FILE_NAME);
+    newConf.addResource(AdlStorageContract.CONTRACT_XML);
     return newConf;
   }
 
@@ -58,7 +55,7 @@ public final class AdlStorageConfiguration {
       conf = getConfiguration();
     }
 
-    isContractTestEnabled = conf.getBoolean(CONTRACT_ENABLE_KEY, false);
+    isContractTestEnabled = !conf.get(KEY_FILE_SYSTEM, "").isEmpty();
     return isContractTestEnabled;
   }
 
@@ -90,5 +87,18 @@ public final class AdlStorageConfiguration {
 
     fs.initialize(new URI(conf.get(KEY_FILE_SYSTEM)), conf);
     return fs;
+  }
+
+  public static FileContext createFileContext() throws Exception {
+    Configuration conf = AdlStorageConfiguration.getConfiguration();
+    String fileSystem = conf.get(KEY_FILE_SYSTEM);
+    if (fileSystem == null || fileSystem.trim().length() == 0) {
+      throw new Exception("Default file system not configured.");
+    }
+    URI uri = new URI(fileSystem);
+    FileSystem fs = AdlStorageConfiguration.createStorageConnector();
+    return FileContext.getFileContext(
+        new DelegateToFileSystem(uri, fs, conf, fs.getScheme(), false) {
+        }, conf);
   }
 }

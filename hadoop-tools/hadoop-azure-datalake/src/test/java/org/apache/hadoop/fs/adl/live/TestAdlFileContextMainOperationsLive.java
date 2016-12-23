@@ -19,25 +19,23 @@
 
 package org.apache.hadoop.fs.adl.live;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.*;
+import static org.apache.hadoop.util.Shell.WINDOWS;
+
+import java.io.IOException;
+import java.util.UUID;
+
+import org.apache.hadoop.fs.FileContext;
+import org.apache.hadoop.fs.FileContextMainOperationsBaseTest;
+import org.apache.hadoop.fs.FileContextTestHelper;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.UUID;
-
-import static org.apache.hadoop.util.Shell.WINDOWS;
 
 /**
  * Run collection of tests for the {@link FileContext}.
  */
 public class TestAdlFileContextMainOperationsLive
     extends FileContextMainOperationsBaseTest {
-
-  private static final String KEY_FILE_SYSTEM = "test.fs.adl.name";
 
   @BeforeClass
   public static void skipTestCheck() {
@@ -46,16 +44,7 @@ public class TestAdlFileContextMainOperationsLive
 
   @Override
   public void setUp() throws Exception {
-    Configuration conf = AdlStorageConfiguration.getConfiguration();
-    String fileSystem = conf.get(KEY_FILE_SYSTEM);
-    if (fileSystem == null || fileSystem.trim().length() == 0) {
-      throw new Exception("Default file system not configured.");
-    }
-    URI uri = new URI(fileSystem);
-    FileSystem fs = AdlStorageConfiguration.createStorageConnector();
-    fc = FileContext.getFileContext(
-        new DelegateToFileSystem(uri, fs, conf, fs.getScheme(), false) {
-        }, conf);
+    fc = AdlStorageConfiguration.createFileContext();
     super.setUp();
   }
 

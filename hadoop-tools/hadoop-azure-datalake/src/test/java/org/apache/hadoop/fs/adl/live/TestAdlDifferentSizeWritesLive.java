@@ -96,8 +96,7 @@ public class TestAdlDifferentSizeWritesLive {
     try {
       fs = AdlStorageConfiguration.createStorageConnector();
     } catch (URISyntaxException e) {
-      throw new IllegalStateException("Can not initialize ADL FileSystem. "
-          + "Please check test.fs.adl.name property.", e);
+      throw new IllegalStateException("Can not initialize ADL FileSystem", e);
     }
     byte[] expectedData = getRandomByteArrayData(totalSize);
 

@@ -20,47 +20,21 @@
 package org.apache.hadoop.fs.adl.live;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.contract.AbstractFSContract;
+import org.apache.hadoop.fs.adl.AdlFileSystem;
+import org.apache.hadoop.fs.contract.AbstractBondedFSContract;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+class AdlStorageContract extends AbstractBondedFSContract {
 
-class AdlStorageContract extends AbstractFSContract {
-  private FileSystem fs;
+  public static final String CONTRACT_XML = "adls.xml";
 
   protected AdlStorageContract(Configuration conf) {
     super(conf);
-    try {
-      fs = AdlStorageConfiguration.createStorageConnector();
-    } catch (URISyntaxException e) {
-      throw new IllegalStateException("Can not initialize ADL FileSystem. "
-          + "Please check test.fs.adl.name property.", e);
-    } catch (IOException e) {
-      throw new IllegalStateException("Can not initialize ADL FileSystem.", e);
-    }
-    this.setConf(AdlStorageConfiguration.getConfiguration());
+    //insert the base features
+    addConfResource(CONTRACT_XML);
   }
 
   @Override
   public String getScheme() {
-    return "adl";
+    return AdlFileSystem.SCHEME;
   }
-
-  @Override
-  public FileSystem getTestFileSystem() throws IOException {
-    return this.fs;
-  }
-
-  @Override
-  public Path getTestPath() {
-    return new Path("/test");
-  }
-
-  @Override
-  public boolean isEnabled() {
-    return AdlStorageConfiguration.isContractTestEnabled();
-  }
-
 }
