@@ -77,16 +77,19 @@ Credentials can be configured using either a refresh token (associated with a us
 
 ### <a name="Refresh_Token" />Using Refresh Token
 
-Add the following properties to your core-site.xml
+#### Obtaining the refresh token
+Application is required to set Client id and OAuth2 refresh token from Azure
+Active Directory associated with the client id.
+See [https://github.com/AzureAD/azure-activedirectory-library-for-java](https://github.com/AzureAD/azure-activedirectory-library-for-java).
+
+#### Configuring core-site.xml
+Add the following properties to your core-site.xml.
+**Do not share client id and refresh token. They must be kept secret.**
 
         <property>
             <name>dfs.adls.oauth2.access.token.provider.type</name>
             <value>RefreshToken</value>
         </property>
-
-Application require to set Client id and OAuth2 refresh token from Azure Active Directory associated with client id. See [https://github.com/AzureAD/azure-activedirectory-library-for-java](https://github.com/AzureAD/azure-activedirectory-library-for-java).
-
-**Do not share client id and refresh token, it must be kept secret.**
 
         <property>
             <name>dfs.adls.oauth2.client.id</name>
@@ -120,8 +123,14 @@ Application require to set Client id and OAuth2 refresh token from Azure Active 
 3.  Add your user name you created in Step 6 above (note that it does not show up in the list, but will be found if you searched for the name)
 4.  Add "Owner" role
 
-#### Configure core-site.xml
-Add the following properties to your core-site.xml
+#### Configuring core-site.xml
+Add the following properties to your core-site.xml.
+**Do not share client id and credential. They must be kept secret.**
+
+    <property>
+        <name>dfs.adls.oauth2.access.token.provider.type</name>
+        <value>ClientCredential</value>
+    </property>
 
     <property>
       <name>dfs.adls.oauth2.refresh.url</name>
@@ -180,14 +189,11 @@ commands demonstrate access to a storage account named `youraccount`.
 ## <a name="Testing_the_hadoop-azure_Module" />Testing the azure-datalake-store Module
 The hadoop-azure module includes a full suite of unit tests. Most of the tests will run without additional configuration by running mvn test. This includes tests against mocked storage, which is an in-memory emulation of Azure Data Lake Storage.
 
-A selection of tests can run against the Azure Data Lake Storage. To run tests against Adl storage. Please configure contract-test-options.xml with Adl account information mentioned in the above sections. Also turn on contract test execution flag to trigger tests against Azure Data Lake Storage.
+A selection of tests can run against the Azure Data Lake Storage.
+To run tests, please create `auth-keys.xml` with Adl account information
+mentioned in the above sections and the following property.
 
-        <property>
-            <name>dfs.adl.test.contract.enable</name>
-            <value>true</value>
-        </property>
-
-        <property>
-            <name>test.fs.adl.name</name>
-            <value>adl://yourcontainer.azuredatalakestore.net</value>
-        </property>
+    <property>
+      <name>fs.contract.test.fs.adl</name>
+      <value>adl://<Account Name>.azuredatalakestore.net</value>
+    </property>
