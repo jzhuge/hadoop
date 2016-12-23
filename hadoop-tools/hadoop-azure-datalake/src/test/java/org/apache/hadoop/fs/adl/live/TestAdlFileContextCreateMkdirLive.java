@@ -19,24 +19,18 @@
 
 package org.apache.hadoop.fs.adl.live;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.DelegateToFileSystem;
-import org.apache.hadoop.fs.FileContext;
+import java.util.UUID;
+
 import org.apache.hadoop.fs.FileContextCreateMkdirBaseTest;
 import org.apache.hadoop.fs.FileContextTestHelper;
-import org.apache.hadoop.fs.FileSystem;
 import org.junit.Assume;
 import org.junit.BeforeClass;
-
-import java.net.URI;
-import java.util.UUID;
 
 /**
  * Test file context Create/Mkdir operation.
  */
 public class TestAdlFileContextCreateMkdirLive
     extends FileContextCreateMkdirBaseTest {
-  private static final String KEY_FILE_SYSTEM = "test.fs.adl.name";
 
   @BeforeClass
   public static void skipTestCheck() {
@@ -45,16 +39,7 @@ public class TestAdlFileContextCreateMkdirLive
 
   @Override
   public void setUp() throws Exception {
-    Configuration conf = AdlStorageConfiguration.getConfiguration();
-    String fileSystem = conf.get(KEY_FILE_SYSTEM);
-    if (fileSystem == null || fileSystem.trim().length() == 0) {
-      throw new Exception("Default file system not configured.");
-    }
-    URI uri = new URI(fileSystem);
-    FileSystem fs = AdlStorageConfiguration.createStorageConnector();
-    fc = FileContext.getFileContext(
-        new DelegateToFileSystem(uri, fs, conf, fs.getScheme(), false) {
-        }, conf);
+    fc = AdlStorageConfiguration.createFileContext();
     super.setUp();
   }
 

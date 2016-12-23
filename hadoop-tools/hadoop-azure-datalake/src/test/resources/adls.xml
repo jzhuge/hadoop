@@ -12,6 +12,15 @@
   limitations under the License. See accompanying LICENSE file.
 -->
 <configuration>
+
+  <!-- Save the above configuration properties in a separate file named -->
+  <!-- auth-keys.xml in the same directory as this file. -->
+  <!-- DO NOT ADD auth-keys.xml TO REVISION CONTROL.  The keys to your -->
+  <!-- Azure Data Lake Store account are a secret and must not be shared. -->
+  <include xmlns="http://www.w3.org/2001/XInclude" href="auth-keys.xml">
+    <fallback />
+  </include>
+
   <property>
     <name>fs.contract.test.root-tests-enabled</name>
     <value>true</value>
