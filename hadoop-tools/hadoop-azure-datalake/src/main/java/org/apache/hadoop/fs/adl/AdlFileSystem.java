@@ -62,6 +62,7 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.util.Progressable;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.VersionInfo;
+
 import static org.apache.hadoop.fs.adl.AdlConfKeys.*;
 
 /**
@@ -248,17 +249,17 @@ public class AdlFileSystem extends FileSystem {
   }
 
   private AccessTokenProvider getConfCredentialBasedTokenProvider(
-      Configuration conf) {
+      Configuration conf) throws IOException {
     String clientId = getNonEmptyVal(conf, AZURE_AD_CLIENT_ID_KEY);
     String refreshUrl = getNonEmptyVal(conf, AZURE_AD_REFRESH_URL_KEY);
-    String clientSecret = getNonEmptyVal(conf, AZURE_AD_CLIENT_SECRET_KEY);
+    String clientSecret = getPasswordString(conf, AZURE_AD_CLIENT_SECRET_KEY);
     return new ClientCredsTokenProvider(refreshUrl, clientId, clientSecret);
   }
 
   private AccessTokenProvider getConfRefreshTokenBasedTokenProvider(
-      Configuration conf) {
+      Configuration conf) throws IOException {
     String clientId = getNonEmptyVal(conf, AZURE_AD_CLIENT_ID_KEY);
-    String refreshToken = getNonEmptyVal(conf, AZURE_AD_REFRESH_TOKEN_KEY);
+    String refreshToken = getPasswordString(conf, AZURE_AD_REFRESH_TOKEN_KEY);
     return new RefreshTokenBasedTokenProvider(clientId, refreshToken);
   }
 
@@ -938,4 +939,21 @@ public class AdlFileSystem extends FileSystem {
     return value;
   }
 
+  /**
+   * A wrapper of {@link Configuration#getPassword(String)}. It returns
+   * <code>String</code> instead of <code>char[]</code>.
+   *
+   * @param conf the configuration
+   * @param key the property key
+   * @return the password string
+   * @throws IOException if the password was not found
+   */
+  private static String getPasswordString(Configuration conf, String key)
+      throws IOException {
+    char[] passchars = conf.getPassword(key);
+    if (passchars == null) {
+      throw new IOException("Password " + key + " not found");
+    }
+    return new String(passchars);
+  }
 }
