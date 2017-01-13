@@ -62,6 +62,8 @@ import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.util.Progressable;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.VersionInfo;
+import org.apache.kerby.config.Conf;
+
 import static org.apache.hadoop.fs.adl.AdlConfKeys.*;
 
 /**
@@ -248,17 +250,17 @@ public class AdlFileSystem extends FileSystem {
   }
 
   private AccessTokenProvider getConfCredentialBasedTokenProvider(
-      Configuration conf) {
-    String clientId = getNonEmptyVal(conf, AZURE_AD_CLIENT_ID_KEY);
-    String refreshUrl = getNonEmptyVal(conf, AZURE_AD_REFRESH_URL_KEY);
-    String clientSecret = getNonEmptyVal(conf, AZURE_AD_CLIENT_SECRET_KEY);
+      Configuration conf) throws IOException {
+    String clientId = conf.getPasswordString(AZURE_AD_CLIENT_ID_KEY);
+    String refreshUrl = conf.getPasswordString(AZURE_AD_REFRESH_URL_KEY);
+    String clientSecret = conf.getPasswordString(AZURE_AD_CLIENT_SECRET_KEY);
     return new ClientCredsTokenProvider(refreshUrl, clientId, clientSecret);
   }
 
   private AccessTokenProvider getConfRefreshTokenBasedTokenProvider(
-      Configuration conf) {
-    String clientId = getNonEmptyVal(conf, AZURE_AD_CLIENT_ID_KEY);
-    String refreshToken = getNonEmptyVal(conf, AZURE_AD_REFRESH_TOKEN_KEY);
+      Configuration conf) throws IOException {
+    String clientId = conf.getPasswordString(AZURE_AD_CLIENT_ID_KEY);
+    String refreshToken = conf.getPasswordString(AZURE_AD_REFRESH_TOKEN_KEY);
     return new RefreshTokenBasedTokenProvider(clientId, refreshToken);
   }
 

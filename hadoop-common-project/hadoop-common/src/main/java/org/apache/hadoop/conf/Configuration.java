@@ -2014,6 +2014,23 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
   }
 
   /**
+   * A wrapper of {@link #getPassword(String)}. It returns
+   * <code>String</code> instead of <code>char[]</code> and throws
+   * {@link IOException} when the password not found.
+   *
+\   * @param name the property name
+   * @return the password string
+   */
+  public String getPasswordString(String name)
+      throws IOException {
+    char[] passchars = getPassword(name);
+    if (passchars == null) {
+      throw new IOException("Password " + name + " not found");
+    }
+    return new String(passchars);
+  }
+
+  /**
    * Get the value for a known password configuration element.
    * In order to enable the elimination of clear text passwords in config,
    * this method attempts to resolve the property name as an alias through
