@@ -161,7 +161,7 @@ public class SSLFactory implements ConnectionConfigurator {
   }
 
   private Configuration readSSLConfiguration(Mode mode) {
-    Configuration sslConf = new Configuration(false);
+    Configuration sslConf = new Configuration(conf);
     sslConf.setBoolean(SSL_REQUIRE_CLIENT_CERT_KEY, requireClientCert);
     String sslConfResource;
     if (mode == Mode.CLIENT) {
