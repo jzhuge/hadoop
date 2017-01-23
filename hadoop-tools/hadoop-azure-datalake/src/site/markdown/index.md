@@ -224,14 +224,11 @@ commands demonstrate access to a storage account named `youraccount`.
 ## <a name="Testing_the_hadoop-azure_Module" />Testing the azure-datalake-store Module
 The hadoop-azure module includes a full suite of unit tests. Most of the tests will run without additional configuration by running mvn test. This includes tests against mocked storage, which is an in-memory emulation of Azure Data Lake Storage.
 
-A selection of tests can run against the Azure Data Lake Storage. To run tests against Adl storage. Please configure contract-test-options.xml with Adl account information mentioned in the above sections. Also turn on contract test execution flag to trigger tests against Azure Data Lake Storage.
+A selection of tests can run against the Azure Data Lake Storage.
+To run tests, please create `auth-keys.xml` with Adl account information
+mentioned in the above sections and the following property.
 
-        <property>
-            <name>dfs.adl.test.contract.enable</name>
-            <value>true</value>
-        </property>
-
-        <property>
-            <name>test.fs.adl.name</name>
-            <value>adl://yourcontainer.azuredatalakestore.net</value>
-        </property>
+    <property>
+      <name>fs.contract.test.fs.adl</name>
+      <value>adl://<Account Name>.azuredatalakestore.net</value>
+    </property>
