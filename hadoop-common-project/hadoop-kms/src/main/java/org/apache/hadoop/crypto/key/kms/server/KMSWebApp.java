@@ -144,14 +144,6 @@ public class KMSWebApp implements ServletContextListener {
 
       kmsAudit = new KMSAudit(kmsConf);
 
-      // this is required for the the JMXJsonServlet to work properly.
-      // the JMXJsonServlet is behind the authentication filter,
-      // thus the '*' ACL.
-      sce.getServletContext().setAttribute(HttpServer2.CONF_CONTEXT_ATTRIBUTE,
-          kmsConf);
-      sce.getServletContext().setAttribute(HttpServer2.ADMINS_ACL,
-          new AccessControlList(AccessControlList.WILDCARD_ACL_VALUE));
-
       // intializing the KeyProvider
       String providerString = kmsConf.get(KMSConfiguration.KEY_PROVIDER_URI);
       if (providerString == null) {
