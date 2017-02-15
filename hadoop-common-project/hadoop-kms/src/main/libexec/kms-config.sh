@@ -56,7 +56,10 @@ print "Setting KMS_HOME:          ${KMS_HOME}"
 if [ -e "${KMS_HOME}/bin/kms-env.sh" ]; then
   print "Sourcing:                    ${KMS_HOME}/bin/kms-env.sh"
   source ${KMS_HOME}/bin/kms-env.sh
-  grep "^ *export " ${KMS_HOME}/bin/kms-env.sh | sed 's/ *export/  setting/'
+  if [ "${KMS_SILENT}" != "true" ]; then
+    grep "^ *export " "${KMS_HOME}/bin/kms-env.sh" |
+      sed 's/ *export/  setting/'
+  fi
 fi
 
 # verify that the sourced env file didn't change KMS_HOME
@@ -81,7 +84,10 @@ kms_config=${KMS_CONFIG}
 if [ -e "${KMS_CONFIG}/kms-env.sh" ]; then
   print "Sourcing:                    ${KMS_CONFIG}/kms-env.sh"
   source ${KMS_CONFIG}/kms-env.sh
-  grep "^ *export " ${KMS_CONFIG}/kms-env.sh | sed 's/ *export/  setting/'
+  if [ "${KMS_SILENT}" != "true" ]; then
+    grep "^ *export " "${KMS_CONFIG}/kms-env.sh" |
+      sed 's/ *export/  setting/'
+  fi
 fi
 
 # verify that the sourced env file didn't change KMS_HOME
