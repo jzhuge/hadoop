@@ -70,6 +70,7 @@ catalina_opts="${catalina_opts} -Dkms.max.threads=${KMS_MAX_THREADS}";
 catalina_opts="${catalina_opts} -Dkms.accept.count=${KMS_ACCEPT_COUNT}";
 catalina_opts="${catalina_opts} -Dkms.acceptor.thread.count=${KMS_ACCEPTOR_THREAD_COUNT}";
 catalina_opts="${catalina_opts} -Dkms.max.http.header.size=${KMS_MAX_HTTP_HEADER_SIZE}";
+catalina_opts="${catalina_opts} -Dkms.ssl.ciphers=${KMS_SSL_CIPHERS}";
 catalina_opts="${catalina_opts} -Dkms.ssl.keystore.file=${KMS_SSL_KEYSTORE_FILE}";
 catalina_opts="${catalina_opts} -Djava.library.path=${JAVA_LIBRARY_PATH}";
 
