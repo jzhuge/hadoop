@@ -56,7 +56,10 @@ print "Setting HTTPFS_HOME:          ${HTTPFS_HOME}"
 if [ -e "${HTTPFS_HOME}/bin/httpfs-env.sh" ]; then
   print "Sourcing:                    ${HTTPFS_HOME}/bin/httpfs-env.sh"
   source ${HTTPFS_HOME}/bin/httpfs-env.sh
-  grep "^ *export " ${HTTPFS_HOME}/bin/httpfs-env.sh | sed 's/ *export/  setting/'
+  if [ "${HTTPFS_SILENT}" != "true" ]; then
+    grep "^ *export " "${HTTPFS_HOME}/bin/httpfs-env.sh" |
+      sed 's/ *export/  setting/'
+  fi
 fi
 
 # verify that the sourced env file didn't change HTTPFS_HOME
@@ -81,7 +84,10 @@ httpfs_config=${HTTPFS_CONFIG}
 if [ -e "${HTTPFS_CONFIG}/httpfs-env.sh" ]; then
   print "Sourcing:                    ${HTTPFS_CONFIG}/httpfs-env.sh"
   source ${HTTPFS_CONFIG}/httpfs-env.sh
-  grep "^ *export " ${HTTPFS_CONFIG}/httpfs-env.sh | sed 's/ *export/  setting/'
+  if [ "${HTTPFS_SILENT}" != "true" ]; then
+    grep "^ *export " "${HTTPFS_CONFIG}/httpfs-env.sh" |
+      sed 's/ *export/  setting/'
+  fi
 fi
 
 # verify that the sourced env file didn't change HTTPFS_HOME

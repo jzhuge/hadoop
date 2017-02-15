@@ -37,20 +37,46 @@ source ${HADOOP_LIBEXEC_DIR:-${BASEDIR}/libexec}/httpfs-config.sh
 print "Using   CATALINA_OPTS:       ${CATALINA_OPTS}"
 
 catalina_opts="-Dproc_httpfs";
-catalina_opts="${catalina_opts} -Dhttpfs.home.dir=${HTTPFS_HOME}";
-catalina_opts="${catalina_opts} -Dhttpfs.config.dir=${HTTPFS_CONFIG}";
-catalina_opts="${catalina_opts} -Dhttpfs.log.dir=${HTTPFS_LOG}";
-catalina_opts="${catalina_opts} -Dhttpfs.temp.dir=${HTTPFS_TEMP}";
-catalina_opts="${catalina_opts} -Dhttpfs.admin.port=${HTTPFS_ADMIN_PORT}";
-catalina_opts="${catalina_opts} -Dhttpfs.http.port=${HTTPFS_HTTP_PORT}";
-catalina_opts="${catalina_opts} -Dhttpfs.http.hostname=${HTTPFS_HTTP_HOSTNAME}";
-catalina_opts="${catalina_opts} -Dhttpfs.ssl.enabled=${HTTPFS_SSL_ENABLED}";
-catalina_opts="${catalina_opts} -Dhttpfs.ssl.keystore.file=${HTTPFS_SSL_KEYSTORE_FILE}";
-catalina_opts="${catalina_opts} -Dhttpfs.ssl.keystore.pass=${HTTPFS_SSL_KEYSTORE_PASS}";
 
 print "Adding to CATALINA_OPTS:     ${catalina_opts}"
 
 export CATALINA_OPTS="${CATALINA_OPTS} ${catalina_opts}"
+
+catalina_init_properties() {
+  if [[ -r "${CATALINA_BASE}/conf/catalina-default.properties" ]]; then
+    cp "${CATALINA_BASE}/conf/catalina-default.properties" \
+      "${CATALINA_BASE}/conf/catalina.properties"
+  else
+    > "${CATALINA_BASE}/conf/catalina.properties"
+  fi
+}
+
+catalina_set_property() {
+  local key=$1
+  local value=$2
+  local disp_value=${value}
+  [[ -z $value ]] && return
+  [[ -n $3 ]] && disp_value="<redacted>"
+  print "Setting catalina property ${key} to ${disp_value}"
+  echo "${key}=${value}" >> "${CATALINA_BASE}/conf/catalina.properties"
+}
+
+if [[ "${1}" = "start" || "${1}" = "run" ]]; then
+  catalina_init_properties
+  catalina_set_property "httpfs.home.dir" "${HTTPFS_HOME}"
+  catalina_set_property "httpfs.config.dir" "${HTTPFS_CONFIG}"
+  catalina_set_property "httpfs.log.dir" "${HTTPFS_LOG}"
+  catalina_set_property "httpfs.temp.dir" "${HTTPFS_TEMP}"
+  catalina_set_property "httpfs.admin.port" "${HTTPFS_ADMIN_PORT}"
+  catalina_set_property "httpfs.http.port" "${HTTPFS_HTTP_PORT}"
+  catalina_set_property "httpfs.http.hostname" "${HTTPFS_HTTP_HOSTNAME}"
+  catalina_set_property "httpfs.ssl.enabled" "${HTTPFS_SSL_ENABLED}"
+  catalina_set_property "httpfs.ssl.ciphers" "${HTTPFS_SSL_CIPHERS}"
+  catalina_set_property "httpfs.ssl.keystore.file" \
+    "${HTTPFS_SSL_KEYSTORE_FILE}"
+  catalina_set_property "httpfs.ssl.keystore.pass" \
+    "${HTTPFS_SSL_KEYSTORE_PASS}" "redact"
+fi
 
 # A bug in catalina.sh script does not use CATALINA_OPTS for stopping the server
 #
@@ -59,8 +85,8 @@ if [ "${1}" = "stop" ]; then
 fi
 
 if [ "${HTTPFS_SILENT}" != "true" ]; then
-  exec ${HTTPFS_CATALINA_HOME}/bin/catalina.sh "$@"
+  exec "${HTTPFS_CATALINA_HOME}/bin/catalina.sh" "$@"
 else
-  exec ${HTTPFS_CATALINA_HOME}/bin/catalina.sh "$@" > /dev/null
+  exec "${HTTPFS_CATALINA_HOME}/bin/catalina.sh" "$@" > /dev/null
 fi
 
