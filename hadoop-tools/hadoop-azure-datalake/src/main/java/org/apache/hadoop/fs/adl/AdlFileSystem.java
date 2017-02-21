@@ -88,6 +88,10 @@ public class AdlFileSystem extends FileSystem {
   private AccessTokenProvider tokenProvider;
   private AzureADTokenProvider azureTokenProvider;
 
+  static {
+    AdlConfKeys.addDeprecatedKeys();
+  }
+
   @Override
   public String getScheme() {
     return SCHEME;
@@ -140,10 +144,16 @@ public class AdlFileSystem extends FileSystem {
     String hostname = storeUri.getHost();
     if (!hostname.contains(".") && !hostname.equalsIgnoreCase(
         "localhost")) {  // this is a symbolic name. Resolve it.
-      String hostNameProperty = "dfs.adls." + hostname + ".hostname";
-      String mountPointProperty = "dfs.adls." + hostname + ".mountpoint";
-      accountFQDN = getNonEmptyVal(conf, hostNameProperty);
-      mountPoint = getNonEmptyVal(conf, mountPointProperty);
+      String deprecatedHostNameProperty =
+          "dfs.adls." + hostname + "" + ".hostname";
+      String hostNameProperty = "fs.adl." + hostname + ".hostname";
+      String deprecatedMountPointProperty =
+          "dfs.adls." + hostname + ".mountpoint";
+      String mountPointProperty = "fs.adl." + hostname + ".mountpoint";
+      accountFQDN = getNonEmptyVal2(conf, hostNameProperty,
+          deprecatedHostNameProperty);
+      mountPoint = getNonEmptyVal2(conf, mountPointProperty,
+          deprecatedMountPointProperty);
     } else {
       accountFQDN = hostname;
     }
@@ -948,6 +958,19 @@ public class AdlFileSystem extends FileSystem {
 
   private static String getNonEmptyVal(Configuration conf, String key) {
     String value = conf.get(key);
+    if (StringUtils.isEmpty(value)) {
+      throw new IllegalArgumentException(
+          "No value for " + key + " found in conf file.");
+    }
+    return value;
+  }
+
+  private static String getNonEmptyVal2(Configuration conf, String key,
+                                        String deprecatedKey) {
+    String value = conf.get(key);
+    if (value == null) {
+      value = conf.get(deprecatedKey);
+    }
     if (StringUtils.isEmpty(value)) {
       throw new IllegalArgumentException(
           "No value for " + key + " found in conf file.");
