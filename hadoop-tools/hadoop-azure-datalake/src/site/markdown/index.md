@@ -78,16 +78,19 @@ Credentials can be configured using either a refresh token (associated with a us
 
 ### <a name="Refresh_Token" />Using Refresh Token
 
-Add the following properties to your core-site.xml
+#### Obtaining the refresh token
+Application is required to set Client id and OAuth2 refresh token from Azure
+Active Directory associated with the client id.
+See [https://github.com/AzureAD/azure-activedirectory-library-for-java](https://github.com/AzureAD/azure-activedirectory-library-for-java).
+
+#### Configuring core-site.xml
+Add the following properties to your core-site.xml.
+**Do not share client id and refresh token. They must be kept secret.**
 
         <property>
             <name>dfs.adls.oauth2.access.token.provider.type</name>
             <value>RefreshToken</value>
         </property>
-
-Application require to set Client id and OAuth2 refresh token from Azure Active Directory associated with client id. See [https://github.com/AzureAD/azure-activedirectory-library-for-java](https://github.com/AzureAD/azure-activedirectory-library-for-java).
-
-**Do not share client id and refresh token, it must be kept secret.**
 
         <property>
             <name>dfs.adls.oauth2.client.id</name>
@@ -121,12 +124,15 @@ Application require to set Client id and OAuth2 refresh token from Azure Active 
 3.  Add your user name you created in Step 6 above (note that it does not show up in the list, but will be found if you searched for the name)
 4.  Add "Owner" role
 
-#### Configure core-site.xml
-Add the following properties to your core-site.xml
+#### Configuring core-site.xml
+Add the following properties to your core-site.xml.
+Property `dfs.adls.oauth2.access.token.provider.type` can be omitted because
+its default value is `ClientCredential`.
+**Do not share client id and credential. They must be kept secret.**
 
     <property>
-      <name>dfs.adls.oauth2.refresh.url</name>
-      <value>TOKEN ENDPOINT FROM STEP 7 ABOVE</value>
+        <name>dfs.adls.oauth2.access.token.provider.type</name>
+        <value>ClientCredential</value>
     </property>
 
     <property>
@@ -139,6 +145,11 @@ Add the following properties to your core-site.xml
       <value>PASSWORD FROM STEP 7 ABOVE</value>
     </property>
 
+    <property>
+      <name>dfs.adls.oauth2.refresh.url</name>
+      <value>TOKEN ENDPOINT FROM STEP 7 ABOVE</value>
+    </property>
+
 
 ### <a name="Credential_Provider" />Protecting the Credentials with Credential Providers
 
@@ -147,42 +158,42 @@ these credentials from prying eyes, it is recommended that you use the
 credential provider framework to securely store them and access them through
 configuration.
 
-All ADLS credential properties can be protected by credential providers.
-For additional reading on the credential provider API, see
+All credential properties except `dfs.adls.oauth2.access.token.provider.type`
+can be protected by credential providers. For additional reading on the
+credential provider API, see
 [Credential Provider API](../hadoop-project-dist/hadoop-common/CredentialProviderAPI.html).
 
-#### Provisioning
+#### Provisioning credentials
+Run command `hadoop credential create` to create a credential store.
 
 ```
-% hadoop credential create dfs.adls.oauth2.refresh.token -value 123
-    -provider localjceks://file/home/foo/adls.jceks
-% hadoop credential create dfs.adls.oauth2.credential -value 123
-    -provider localjceks://file/home/foo/adls.jceks
+% hadoop credential create dfs.adls.oauth2.client.id -value 123 \
+    -provider jceks://hdfs/home/foo/adls.jceks
+% hadoop credential create dfs.adls.oauth2.credential -value 456 \
+    -provider jceks://hdfs/home/foo/adls.jceks
+% hadoop credential create dfs.adls.oauth2.refresh.url -value 789 \
+    -provider jceks://hdfs/home/foo/adls.jceks
 ```
 
-#### Configuring core-site.xml or command line property
+#### Configuring core-site.xml
+Add property `hadoop.security.credential.provider.path` to `core-site.xml`.
 
-```
-<property>
-  <name>hadoop.security.credential.provider.path</name>
-  <value>localjceks://file/home/foo/adls.jceks</value>
-  <description>Path to interrogate for protected credentials.</description>
-</property>
-```
+    <property>
+      <name>hadoop.security.credential.provider.path</name>
+      <value>jceks://hdfs/home/foo/adls.jceks</value>
+      <description>Path to interrogate for protected credentials.</description>
+    </property>
+
 
 #### Running DistCp
+You may optionally add the provider path property to the DistCp command line
+instead of adding job specific configuration to a generic `core-site.xml`.
 
 ```
-% hadoop distcp
-    [-D hadoop.security.credential.provider.path=localjceks://file/home/user/adls.jceks]
-    hdfs://<NameNode Hostname>:9001/user/foo/007020615
-    adl://<Account Name>.azuredatalakestore.net/testDir/
+% hadoop distcp \
+    -Dhadoop.security.credential.provider.path=jceks://hdfs/home/user/adls.jceks \
+    /tmp/testDir adl://<Account Name>.azuredatalakestore.net/testDir/
 ```
-
-NOTE: You may optionally add the provider path property to the distcp command
-line instead of added job specific configuration to a generic core-site.xml.
-The square brackets above illustrate this capability.
-
 
 ## <a name="Enabling_ADL" />Enabling ADL Filesystem
 
