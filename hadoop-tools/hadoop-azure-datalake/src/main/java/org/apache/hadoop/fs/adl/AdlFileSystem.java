@@ -88,6 +88,10 @@ public class AdlFileSystem extends FileSystem {
   private AccessTokenProvider tokenProvider;
   private AzureADTokenProvider azureTokenProvider;
 
+  static {
+    addDeprecatedKeys();
+  }
+
   @Override
   public String getScheme() {
     return SCHEME;
@@ -140,8 +144,8 @@ public class AdlFileSystem extends FileSystem {
     String hostname = storeUri.getHost();
     if (!hostname.contains(".") && !hostname.equalsIgnoreCase(
         "localhost")) {  // this is a symbolic name. Resolve it.
-      String hostNameProperty = "dfs.adls." + hostname + ".hostname";
-      String mountPointProperty = "dfs.adls." + hostname + ".mountpoint";
+      String hostNameProperty = "fs.adl." + hostname + ".hostname";
+      String mountPointProperty = "fs.adl." + hostname + ".mountpoint";
       accountFQDN = getNonEmptyVal(conf, hostNameProperty);
       mountPoint = getNonEmptyVal(conf, mountPointProperty);
     } else {
@@ -239,7 +243,8 @@ public class AdlFileSystem extends FileSystem {
     Configuration conf = ProviderUtils.excludeIncompatibleCredentialProviders(
         config, AdlFileSystem.class);
     TokenProviderType type = conf.getEnum(
-        AdlConfKeys.AZURE_AD_TOKEN_PROVIDER_TYPE_KEY, TokenProviderType.Custom);
+        AdlConfKeys.AZURE_AD_TOKEN_PROVIDER_TYPE_KEY,
+        AdlConfKeys.AZURE_AD_TOKEN_PROVIDER_TYPE_DEFAULT);
 
     switch (type) {
     case RefreshToken:

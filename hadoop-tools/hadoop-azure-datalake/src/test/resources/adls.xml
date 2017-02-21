@@ -16,7 +16,7 @@
   To run live tests:
   # Create a file auth-keys.xml  - DO NOT ADD TO REVISION CONTROL
   # Add property test.fs.adl.name to point to an ADLS filesystem URL
-  # Add property dfs.adl.test.contract.enable with value set to true
+  # Add property fs.adl.test.contract.enable with value set to true
   # Add the credentials for the service you are testing against
   -->
   <include xmlns="http://www.w3.org/2001/XInclude" href="auth-keys.xml">
