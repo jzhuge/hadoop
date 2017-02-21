@@ -20,7 +20,9 @@
 package org.apache.hadoop.fs.adl.live;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configuration.DeprecationDelta;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.adl.AdlConfKeys;
 import org.apache.hadoop.fs.adl.AdlFileSystem;
 import org.apache.hadoop.util.ReflectionUtils;
 
@@ -35,7 +37,7 @@ public final class AdlStorageConfiguration {
   static final String CONTRACT_XML = "adls.xml";
 
   private static final String CONTRACT_ENABLE_KEY =
-      "dfs.adl.test.contract.enable";
+      "fs.adl.test.contract.enable";
   private static final boolean CONTRACT_ENABLE_DEFAULT = false;
 
   private static final String FILE_SYSTEM_KEY =
@@ -48,6 +50,18 @@ public final class AdlStorageConfiguration {
 
   private static boolean isContractTestEnabled = false;
   private static Configuration conf = null;
+
+  static {
+    addDeprecatedKeys();
+    AdlConfKeys.addDeprecatedKeys();
+  }
+
+  private static void addDeprecatedKeys() {
+    Configuration.addDeprecations(new DeprecationDelta[]{
+        new DeprecationDelta("dfs.adl.test.contract.enable",
+            CONTRACT_ENABLE_KEY)
+    });
+  }
 
   private AdlStorageConfiguration() {
   }

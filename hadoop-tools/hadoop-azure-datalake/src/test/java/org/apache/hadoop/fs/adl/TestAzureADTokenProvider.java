@@ -122,7 +122,7 @@ public class TestAzureADTokenProvider {
           + "configuration");
     } catch (IllegalArgumentException e) {
       Assert.assertTrue(
-          e.getMessage().contains("dfs.adls.oauth2.access.token.provider"));
+          e.getMessage().contains(AZURE_AD_TOKEN_PROVIDER_CLASS_KEY));
     }
     conf.setClass(AZURE_AD_TOKEN_PROVIDER_CLASS_KEY,
         CustomMockTokenProvider.class, AzureADTokenProvider.class);

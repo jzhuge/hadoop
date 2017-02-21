@@ -83,7 +83,7 @@ Add the following properties to the cluster's `core-site.xml`
 
 ```xml
 <property>
-  <name>dfs.adls.oauth2.access.token.provider.type</name>
+  <name>fs.adl.oauth2.access.token.provider.type</name>
   <value>RefreshToken</value>
 </property>
 ```
@@ -95,12 +95,12 @@ service associated with the client id. See [*Active Directory Library For Java*]
 
 ```xml
 <property>
-  <name>dfs.adls.oauth2.client.id</name>
+  <name>fs.adl.oauth2.client.id</name>
   <value></value>
 </property>
 
 <property>
-  <name>dfs.adls.oauth2.refresh.token</name>
+  <name>fs.adl.oauth2.refresh.token</name>
   <value></value>
 </property>
 ```
@@ -133,17 +133,17 @@ Add the following properties to your `core-site.xml`
 
 ```xml
 <property>
-  <name>dfs.adls.oauth2.refresh.url</name>
+  <name>fs.adl.oauth2.refresh.url</name>
   <value>TOKEN ENDPOINT FROM STEP 7 ABOVE</value>
 </property>
 
 <property>
-  <name>dfs.adls.oauth2.client.id</name>
+  <name>fs.adl.oauth2.client.id</name>
   <value>CLIENT ID FROM STEP 7 ABOVE</value>
 </property>
 
 <property>
-  <name>dfs.adls.oauth2.credential</name>
+  <name>fs.adl.oauth2.credential</name>
   <value>PASSWORD FROM STEP 7 ABOVE</value>
 </property>
 ```
@@ -161,9 +161,9 @@ For additional reading on the credential provider API, see
 ##### Provisioning
 
 ```bash
-hadoop credential create dfs.adls.oauth2.refresh.token -value 123
+hadoop credential create fs.adl.oauth2.refresh.token -value 123
     -provider localjceks://file/home/foo/adls.jceks
-hadoop credential create dfs.adls.oauth2.credential -value 123
+hadoop credential create fs.adl.oauth2.credential -value 123
     -provider localjceks://file/home/foo/adls.jceks
 ```
 
@@ -252,7 +252,7 @@ information mentioned in the above sections and the following properties.
 
 ```xml
 <property>
-    <name>dfs.adl.test.contract.enable</name>
+    <name>fs.adl.test.contract.enable</name>
     <value>true</value>
 </property>
 
