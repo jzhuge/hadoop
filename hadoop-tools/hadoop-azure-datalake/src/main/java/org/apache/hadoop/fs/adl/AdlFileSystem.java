@@ -128,6 +128,7 @@ public class AdlFileSystem extends FileSystem {
     try {
       userName = UserGroupInformation.getCurrentUser().getShortUserName();
     } catch (IOException e) {
+      LOG.error("Exception when getting user name", e);
       userName = "hadoop";
     }
 
