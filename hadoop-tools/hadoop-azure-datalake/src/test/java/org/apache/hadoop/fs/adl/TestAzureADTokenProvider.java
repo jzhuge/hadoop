@@ -151,16 +151,6 @@ public class TestAzureADTokenProvider {
     }
   }
 
-  private CredentialProvider createTempCredProvider(Configuration conf)
-      throws URISyntaxException, IOException {
-    final File file = tempDir.newFile("test.jks");
-    final URI jks = ProviderUtils.nestURIForLocalJavaKeyStoreProvider(
-        file.toURI());
-    conf.set(CredentialProviderFactory.CREDENTIAL_PROVIDER_PATH,
-        jks.toString());
-    return CredentialProviderFactory.getProviders(conf).get(0);
-  }
-
   @Test
   public void testRefreshTokenWithCredentialProvider()
       throws IOException, URISyntaxException {
@@ -278,8 +268,44 @@ public class TestAzureADTokenProvider {
     excludeAndTestExpectations(config, newPath);
   }
 
-  void excludeAndTestExpectations(Configuration config, String newPath)
-      throws Exception {
+  @Test
+  public void testTokenTypeWithCredentialProvider()
+      throws IOException, URISyntaxException {
+    Configuration conf = new Configuration();
+    conf.set(AZURE_AD_CLIENT_ID_KEY, "DUMMY");
+    conf.set(AZURE_AD_REFRESH_TOKEN_KEY, "DUMMY");
+    conf.setEnum(AZURE_AD_TOKEN_PROVIDER_TYPE_KEY, Custom);
+
+    CredentialProvider provider = createTempCredProvider(conf);
+    provider.createCredentialEntry(AZURE_AD_TOKEN_PROVIDER_TYPE_KEY,
+        RefreshToken.toString().toCharArray());
+    provider.createCredentialEntry(AZURE_AD_CLIENT_ID_KEY,
+        CLIENT_ID.toCharArray());
+    provider.createCredentialEntry(AZURE_AD_REFRESH_TOKEN_KEY,
+        REFRESH_TOKEN.toCharArray());
+    provider.flush();
+
+    URI uri = new URI("adl://localhost:8080");
+    AdlFileSystem fileSystem = new AdlFileSystem();
+    fileSystem.initialize(uri, conf);
+    RefreshTokenBasedTokenProvider expected =
+        new RefreshTokenBasedTokenProvider(CLIENT_ID, REFRESH_TOKEN);
+    Assert.assertTrue(EqualsBuilder.reflectionEquals(expected,
+        fileSystem.getTokenProvider()));
+  }
+
+  private CredentialProvider createTempCredProvider(Configuration conf)
+      throws URISyntaxException, IOException {
+    final File file = tempDir.newFile("test.jks");
+    final URI jks = ProviderUtils.nestURIForLocalJavaKeyStoreProvider(
+        file.toURI());
+    conf.set(CredentialProviderFactory.CREDENTIAL_PROVIDER_PATH,
+        jks.toString());
+    return CredentialProviderFactory.getProviders(conf).get(0);
+  }
+
+  private void excludeAndTestExpectations(Configuration config,
+                                          String newPath) throws Exception {
     Configuration conf = ProviderUtils.excludeIncompatibleCredentialProviders(
         config, AdlFileSystem.class);
     String effectivePath = conf.get(

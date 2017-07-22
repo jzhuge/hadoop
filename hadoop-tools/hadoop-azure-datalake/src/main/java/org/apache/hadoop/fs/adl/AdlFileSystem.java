@@ -243,9 +243,10 @@ public class AdlFileSystem extends FileSystem {
       throws IOException {
     Configuration conf = ProviderUtils.excludeIncompatibleCredentialProviders(
         config, AdlFileSystem.class);
-    TokenProviderType type = conf.getEnum(
+    String typeStr = getPasswordString(conf,
         AdlConfKeys.AZURE_AD_TOKEN_PROVIDER_TYPE_KEY,
-        AdlConfKeys.AZURE_AD_TOKEN_PROVIDER_TYPE_DEFAULT);
+        AdlConfKeys.AZURE_AD_TOKEN_PROVIDER_TYPE_DEFAULT.toString());
+    TokenProviderType type = Enum.valueOf(TokenProviderType.class, typeStr);
 
     switch (type) {
     case RefreshToken:
@@ -975,6 +976,26 @@ public class AdlFileSystem extends FileSystem {
     char[] passchars = conf.getPassword(key);
     if (passchars == null) {
       throw new IOException("Password " + key + " not found");
+    }
+    return new String(passchars);
+  }
+
+  /**
+   * A wrapper of {@link Configuration#getPassword(String)}. It returns
+   * <code>String</code> instead of <code>char[]</code>.
+   *
+   * @param conf the configuration
+   * @param key the property key
+   * @param defaultValue the default value if the key is missing
+   * @return the password string
+   * @throws IOException if the password was not found
+   */
+  private static String getPasswordString(Configuration conf, String key,
+                                          String defaultValue)
+      throws IOException {
+    char[] passchars = conf.getPassword(key);
+    if (passchars == null) {
+      return defaultValue;
     }
     return new String(passchars);
   }
