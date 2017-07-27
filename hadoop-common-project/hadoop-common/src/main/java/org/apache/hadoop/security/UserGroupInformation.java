@@ -60,6 +60,7 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.retry.RetryPolicies;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
@@ -954,6 +955,8 @@ public class UserGroupInformation {
         }
       }
 
+      FileSystem.loadFileSystemCredentials(conf, loginUser);
+      
       String fileLocation = System.getenv(HADOOP_TOKEN_FILE_LOCATION);
       if (fileLocation != null) {
         // Load the token storage file and put all of the tokens into the

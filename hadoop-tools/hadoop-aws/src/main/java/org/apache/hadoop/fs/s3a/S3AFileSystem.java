@@ -121,6 +121,7 @@ import org.slf4j.LoggerFactory;
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
 public class S3AFileSystem extends FileSystem {
+  public static final String SCHEME = "s3a";
   /**
    * Default blocksize as used in blocksize and FS status queries.
    */
@@ -199,6 +200,8 @@ public class S3AFileSystem extends FileSystem {
       workingDir = new Path("/user", username)
           .makeQualified(this.uri, this.getWorkingDirectory());
 
+      new S3AFileSystemCredential().
+          load(UserGroupInformation.getLoginUser());
 
       Class<? extends S3ClientFactory> s3ClientFactoryClass = conf.getClass(
           S3_CLIENT_FACTORY_IMPL, DEFAULT_S3_CLIENT_FACTORY_IMPL,
@@ -368,7 +371,7 @@ public class S3AFileSystem extends FileSystem {
    */
   @Override
   public String getScheme() {
-    return "s3a";
+    return SCHEME;
   }
 
   /**

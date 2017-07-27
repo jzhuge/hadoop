@@ -40,6 +40,7 @@ import java.net.InetSocketAddress;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -88,6 +89,7 @@ import org.apache.hadoop.fs.CommonConfigurationKeys;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.net.NetUtils;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.security.alias.CredentialProvider;
 import org.apache.hadoop.security.alias.CredentialProvider.CredentialEntry;
 import org.apache.hadoop.security.alias.CredentialProviderFactory;
@@ -2057,6 +2059,10 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
     set(name, StringUtils.arrayToString(values));
   }
 
+  public static org.apache.hadoop.io.Text nameToAlias(String name) {
+    return new org.apache.hadoop.io.Text(name);
+  }
+
   /**
    * Get the value for a known password configuration element.
    * In order to enable the elimination of clear text passwords in config,
@@ -2066,9 +2072,17 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
    * @return password
    */
   public char[] getPassword(String name) throws IOException {
-    char[] pass = null;
+    UserGroupInformation loginUser = UserGroupInformation.getLoginUser();
+    if (loginUser != null) {
+      byte[] passbytes = loginUser.getCredentials().getSecretKey(
+          nameToAlias(name));
+      if (passbytes != null) {
+        return new String(passbytes, StandardCharsets.UTF_8).trim()
+            .toCharArray();
+      }
+    }
 
-    pass = getPasswordFromCredentialProviders(name);
+    char[] pass = getPasswordFromCredentialProviders(name);
 
     if (pass == null) {
       pass = getPasswordFromConfig(name);

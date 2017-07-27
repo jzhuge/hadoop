@@ -81,6 +81,11 @@ public class CommonConfigurationKeysPublic {
     "fs.client.resolve.remote.symlinks";
   /** Default value for FS_CLIENT_RESOLVE_REMOTE_SYMLINKS_KEY */
   public static final boolean FS_CLIENT_RESOLVE_REMOTE_SYMLINKS_DEFAULT = true;
+  /** See <a href="{@docRoot}/../core-default.html">core-default.xml</a> */
+  public static final String FS_PRELOAD_CREDENTIAL_LIST_KEY =
+      "fs.preload.credential.list";
+  /** Default value for FS_PRELOAD_CREDENTIAL_LIST_KEY */
+  public static final String FS_PRELOAD_CREDENTIAL_LIST_DEFAULT = "";
 
 
   //Defaults are not specified for following keys

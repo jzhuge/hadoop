@@ -1314,6 +1314,14 @@
   <description>The implementation class of the S3A Filesystem</description>
 </property>
 
+  <property>
+    <name>fs.s3a.credential.impl</name>
+    <value>org.apache.hadoop.fs.s3a.S3AFileSystemCredential</value>
+    <description>
+      The implementation class of the S3A FileSystemCredential.
+    </description>
+  </property>
+  
 <property>
   <name>fs.AbstractFileSystem.s3a.impl</name>
   <value>org.apache.hadoop.fs.s3a.S3A</value>
@@ -2547,6 +2555,14 @@
   <property>
     <name>fs.adl.impl</name>
     <value>org.apache.hadoop.fs.adl.AdlFileSystem</value>
+  </property>
+
+  <property>
+    <name>fs.adl.credential.impl</name>
+    <value>org.apache.hadoop.fs.adl.AdlFileSystemCredential</value>
+    <description>
+      The implementation class of the ADL FileSystemCredential.
+    </description>
   </property>
 
   <property>

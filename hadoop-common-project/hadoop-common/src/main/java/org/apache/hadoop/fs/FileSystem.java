@@ -3240,6 +3240,28 @@ public abstract class FileSystem extends Configured implements Closeable {
     return clazz;
   }
 
+  public static void loadFileSystemCredentials(Configuration conf,
+                                               UserGroupInformation loginUser)
+      throws IOException {
+    for (String scheme : conf.getStrings(
+        CommonConfigurationKeysPublic.FS_PRELOAD_CREDENTIAL_LIST_KEY,
+        CommonConfigurationKeysPublic.FS_PRELOAD_CREDENTIAL_LIST_DEFAULT)) {
+      String className = conf.getTrimmed(String.format(
+          "fs.%s.credential.impl", scheme));
+      if (className == null || className.isEmpty()) {
+        continue;
+      }
+      Class<? extends FileSystemCredential> clazz =
+          (Class<? extends FileSystemCredential>)
+              conf.getClassByNameOrNull(className);
+      if (clazz != null) {
+        ReflectionUtils.newInstance(clazz, conf).load(loginUser);
+      } else {
+        LOG.warn("Could not get class " + className);
+      }
+    }
+  }
+
   /**
    * Create and initialize a new instance of a FileSystem.
    * @param uri URI containing the FS schema and FS details

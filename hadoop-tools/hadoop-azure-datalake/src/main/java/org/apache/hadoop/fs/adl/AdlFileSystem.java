@@ -132,6 +132,9 @@ public class AdlFileSystem extends FileSystem {
       userName = "hadoop";
     }
 
+    new AdlFileSystemCredential()
+        .load(UserGroupInformation.getLoginUser());
+
     this.setWorkingDirectory(getHomeDirectory());
 
     overrideOwner = getConf().getBoolean(ADL_DEBUG_OVERRIDE_LOCAL_USER_AS_OWNER,
