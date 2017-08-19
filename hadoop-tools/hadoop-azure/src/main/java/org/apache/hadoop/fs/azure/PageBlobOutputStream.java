@@ -18,6 +18,8 @@
 
 package org.apache.hadoop.fs.azure;
 
+import static org.apache.hadoop.fs.StreamCapabilities.StreamCapability.HFLUSH;
+import static org.apache.hadoop.fs.StreamCapabilities.StreamCapability.HSYNC;
 import static org.apache.hadoop.fs.azure.PageBlobFormatHelpers.PAGE_DATA_SIZE;
 import static org.apache.hadoop.fs.azure.PageBlobFormatHelpers.PAGE_HEADER_SIZE;
 import static org.apache.hadoop.fs.azure.PageBlobFormatHelpers.PAGE_SIZE;
@@ -34,6 +36,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.hadoop.fs.StreamCapabilities;
 import org.apache.hadoop.fs.Syncable;
 import org.apache.hadoop.fs.azure.StorageInterface.CloudPageBlobWrapper;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -52,7 +55,9 @@ import com.microsoft.azure.storage.blob.CloudPageBlob;
  * An output stream that write file data to a page blob stored using ASV's
  * custom format.
  */
-final class PageBlobOutputStream extends OutputStream implements Syncable {
+final class PageBlobOutputStream extends OutputStream implements Syncable,
+    StreamCapabilities {
+
   /**
    * The maximum number of raw bytes Azure Storage allows us to upload in a
    * single request (4 MB).
@@ -573,5 +578,11 @@ final class PageBlobOutputStream extends OutputStream implements Syncable {
   @VisibleForTesting
   void killIoThreads() {
     ioThreadPool.shutdownNow();
+  }
+
+  @Override
+  public boolean hasCapability(String capability) {
+    return capability.equalsIgnoreCase(HSYNC.getValue()) ||
+        capability.equalsIgnoreCase((HFLUSH.getValue()));
   }
 }

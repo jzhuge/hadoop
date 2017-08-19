@@ -26,7 +26,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.event.ProgressEvent;
@@ -47,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
+import org.apache.hadoop.fs.FSImplementationUtils;
 import org.apache.hadoop.io.retry.RetryPolicies;
 import org.apache.hadoop.io.retry.RetryPolicy;
 import org.apache.hadoop.util.Progressable;
@@ -103,7 +103,8 @@ class S3ABlockOutputStream extends OutputStream {
   private MultiPartUpload multiPartUpload;
 
   /** Closed flag. */
-  private final AtomicBoolean closed = new AtomicBoolean(false);
+  private final FSImplementationUtils.CloseChecker closed =
+      new FSImplementationUtils.CloseChecker();
 
   /** Current data block. Null means none currently active */
   private S3ADataBlocks.DataBlock activeBlock;
@@ -213,13 +214,11 @@ class S3ABlockOutputStream extends OutputStream {
   }
 
   /**
-   * Check for the filesystem being open.
-   * @throws IOException if the filesystem is closed.
+   * Check for the stream being open.
+   * @throws IOException if the stream is closed.
    */
   void checkOpen() throws IOException {
-    if (closed.get()) {
-      throw new IOException("Filesystem " + writeOperationHelper + " closed");
-    }
+    closed.checkOpen();
   }
 
   /**
@@ -319,7 +318,7 @@ class S3ABlockOutputStream extends OutputStream {
    */
   @Override
   public void close() throws IOException {
-    if (closed.getAndSet(true)) {
+    if (!closed.enterClose()) {
       // already closed
       LOG.debug("Ignoring close() as stream is already closed");
       return;
