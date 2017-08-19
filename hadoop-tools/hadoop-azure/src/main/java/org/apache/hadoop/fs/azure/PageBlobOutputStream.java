@@ -36,6 +36,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.hadoop.fs.FSImplementationUtils;
 import org.apache.hadoop.fs.StreamCapabilities;
 import org.apache.hadoop.fs.Syncable;
 import org.apache.hadoop.fs.azure.StorageInterface.CloudPageBlobWrapper;
@@ -582,7 +583,6 @@ final class PageBlobOutputStream extends OutputStream implements Syncable,
 
   @Override
   public boolean hasCapability(String capability) {
-    return capability.equalsIgnoreCase(HSYNC.getValue()) ||
-        capability.equalsIgnoreCase((HFLUSH.getValue()));
+    return FSImplementationUtils.hasHSyncCapabilities(capability);
   }
 }
