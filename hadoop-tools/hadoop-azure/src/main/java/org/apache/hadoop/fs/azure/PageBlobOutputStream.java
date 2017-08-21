@@ -18,8 +18,6 @@
 
 package org.apache.hadoop.fs.azure;
 
-import static org.apache.hadoop.fs.StreamCapabilities.StreamCapability.HFLUSH;
-import static org.apache.hadoop.fs.StreamCapabilities.StreamCapability.HSYNC;
 import static org.apache.hadoop.fs.azure.PageBlobFormatHelpers.PAGE_DATA_SIZE;
 import static org.apache.hadoop.fs.azure.PageBlobFormatHelpers.PAGE_HEADER_SIZE;
 import static org.apache.hadoop.fs.azure.PageBlobFormatHelpers.PAGE_SIZE;
@@ -583,6 +581,6 @@ final class PageBlobOutputStream extends OutputStream implements Syncable,
 
   @Override
   public boolean hasCapability(String capability) {
-    return FSImplementationUtils.hasHSyncCapabilities(capability);
+    return FSImplementationUtils.supportsSyncable(capability);
   }
 }
