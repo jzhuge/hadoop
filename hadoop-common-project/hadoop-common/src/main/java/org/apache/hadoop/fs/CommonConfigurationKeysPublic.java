@@ -851,5 +851,14 @@ public class CommonConfigurationKeysPublic {
           "credential$",
           "oauth.*token$",
           HADOOP_SECURITY_SENSITIVE_CONFIG_KEYS);
+  public static final String HADOOP_KEYCHAIN_ENABLED_KEY =
+      "hadoop.keychain.enabled";
+  public static final boolean HADOOP_KEYCHAIN_ENABLED_DEFAULT = true;
+
+  public static final String HADOOP_KEYCHAIN_CREDENTIAL_PROVIDER_PATH_KEY =
+      "hadoop.keychain.credential.provider.path";
+  public static final String HADOOP_KEYCHAIN_CREDENTIAL_PROVIDER_PATH_DEFAULT
+      = "localjceks://file" + System.getProperty("user.home")
+      + "/.config/hadoop/keychain.jceks";
 }
 

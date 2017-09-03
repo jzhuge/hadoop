@@ -30,6 +30,7 @@ import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
+import org.apache.hadoop.util.StringUtils;
 
 /**
  * A factory to create a list of CredentialProvider based on the path given in a
@@ -59,10 +60,10 @@ public abstract class CredentialProviderFactory {
     }
   }
 
-  public static List<CredentialProvider> getProviders(Configuration conf
-                                               ) throws IOException {
+  public static List<CredentialProvider> getProviders(
+      Configuration conf, String providerPath) throws IOException {
     List<CredentialProvider> result = new ArrayList<CredentialProvider>();
-    for(String path: conf.getStringCollection(CREDENTIAL_PROVIDER_PATH)) {
+    for(String path: StringUtils.getStringCollection(providerPath)) {
       try {
         URI uri = new URI(path);
         boolean found = false;
@@ -79,14 +80,19 @@ public abstract class CredentialProviderFactory {
           }
         }
         if (!found) {
-          throw new IOException("No CredentialProviderFactory for " + uri + " in " +
-              CREDENTIAL_PROVIDER_PATH);
+          throw new IOException("No CredentialProviderFactory for " + uri
+              + " in " + providerPath);
         }
       } catch (URISyntaxException error) {
-        throw new IOException("Bad configuration of " + CREDENTIAL_PROVIDER_PATH +
-            " at " + path, error);
+        throw new IOException("Bad configuration of " + providerPath + " at "
+            + path, error);
       }
     }
     return result;
+  }
+
+  public static List<CredentialProvider> getProviders(Configuration conf)
+      throws IOException {
+    return getProviders(conf, conf.get(CREDENTIAL_PROVIDER_PATH));
   }
 }

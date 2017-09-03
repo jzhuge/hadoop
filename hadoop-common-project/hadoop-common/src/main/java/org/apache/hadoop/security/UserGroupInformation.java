@@ -60,6 +60,7 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
+import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.io.retry.RetryPolicies;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
@@ -75,6 +76,8 @@ import org.apache.hadoop.metrics2.lib.MutableGaugeLong;
 import org.apache.hadoop.metrics2.lib.MutableQuantiles;
 import org.apache.hadoop.metrics2.lib.MutableRate;
 import org.apache.hadoop.security.SaslRpcServer.AuthMethod;
+import org.apache.hadoop.security.alias.CredentialProvider;
+import org.apache.hadoop.security.alias.CredentialProviderFactory;
 import org.apache.hadoop.security.authentication.util.KerberosUtil;
 import org.apache.hadoop.security.token.Token;
 import org.apache.hadoop.security.token.TokenIdentifier;
@@ -933,6 +936,8 @@ public class UserGroupInformation {
         proxyUser = System.getProperty(HADOOP_PROXY_USER);
       }
       loginUser = proxyUser == null ? realUser : createProxyUser(proxyUser, realUser);
+
+      loginUser.loadKeychain();
 
       String tokenFileLocation = System.getProperty(HADOOP_TOKEN_FILES);
       if (tokenFileLocation == null) {
@@ -2014,6 +2019,42 @@ public class UserGroupInformation {
       System.out.print(groups[i] + " ");
     }
     System.out.println();    
+  }
+
+  public void loadKeychain() throws IOException {
+    Boolean enabled = conf.getBoolean(
+        CommonConfigurationKeysPublic.HADOOP_KEYCHAIN_ENABLED_KEY,
+        CommonConfigurationKeysPublic.HADOOP_KEYCHAIN_ENABLED_DEFAULT);
+    if (!enabled) {
+      LOG.info("keychain is disabled");
+      return;
+    }
+
+    String providerPath = conf.get(CommonConfigurationKeysPublic
+            .HADOOP_KEYCHAIN_CREDENTIAL_PROVIDER_PATH_KEY,
+        CommonConfigurationKeysPublic
+            .HADOOP_KEYCHAIN_CREDENTIAL_PROVIDER_PATH_DEFAULT);
+    LOG.info("loading keychain from " + providerPath);
+    List<CredentialProvider> providers;
+    try {
+      providers = CredentialProviderFactory.getProviders(conf, providerPath);
+    } catch (IOException ioe) {
+      LOG.warn("getProviders", ioe);
+      return;
+    }
+
+    Credentials credentials = new Credentials();
+    for (CredentialProvider provider : providers) {
+      List<String> aliases = provider.getAliases();
+      Collections.sort(aliases);
+      for (String alias : aliases) {
+        char[] cred = provider.getCredentialEntry(alias).getCredential();
+        credentials.addSecretKey(new Text(alias),
+            new String(cred).getBytes());
+        LOG.info("  secret " + alias + " loaded");
+      }
+    }
+    addCredentials(credentials);
   }
 
   /**

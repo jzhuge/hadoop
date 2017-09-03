@@ -287,10 +287,20 @@
 
 <property>
   <name>hadoop.security.credential.provider.path</name>
-  <value></value>
+  <value>user:///</value>
   <description>
     A comma-separated list of URLs that indicates the type and
     location of a list of providers that should be consulted.
+    User provider must be included for keychain to work.
+  </description>
+</property>
+
+<property>
+  <name>hadoop.keychain.credential.provider.path</name>
+  <value>localjceks://file${user.home}/.config/hadoop/keychain.jceks</value>
+  <description>
+    A comma-separated list of URLs that indicates the type and
+    location of a list of providers that should be loaded into keychain.
   </description>
 </property>
 
